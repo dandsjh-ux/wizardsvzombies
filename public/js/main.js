@@ -30,7 +30,10 @@ const SPELL_SOUND = {
 };
 const BOSS_AURA = { gravecrusher: 0xff9a30, plague_mother: 0x9cff40, lich_king: 0x8a5aff };
 const BUFF_COLORS = { empower: 0xff9d3d, haste: 0x7dffe9, ascend: 0xffd36b, shield: 0xffe9a0, blades: 0xd0a0ff, mana: 0x5aa8ff };
-const lerpAngle = (a, b, t) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return a + d * t; };
+const TAU = Math.PI * 2;
+// shortest signed angle difference, safe for any finite input (no unbounded wrap loops)
+const wrapAngle = (d) => ((((d + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
+const lerpAngle = (a, b, t) => (Number.isFinite(a) && Number.isFinite(b) ? a + wrapAngle(b - a) * t : b || 0);
 const d2 = (ax, az, bx, bz) => (ax - bx) ** 2 + (az - bz) ** 2;
 
 class Game {

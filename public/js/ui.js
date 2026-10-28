@@ -870,14 +870,12 @@ export class UI {
       const dx = sx - cx, dy = sy - cy;
       const s = Math.min((W - mR - mL) / 2 / Math.abs(dx || 1e-6), (H - mB - mT) / 2 / Math.abs(dy || 1e-6));
       let ex = cx + dx * s, ey = cy + dy * s;
-      // nudge along the edge so labels don't stack on top of each other
-      for (let k = 0; k < placed.length; k++) {
-        const [px, py] = placed[k];
-        if (Math.abs(px - ex) < 120 && Math.abs(py - ey) < 26) {
-          if (Math.abs(ey - mT) < 2 || Math.abs(ey - (H - mB)) < 2) ex += ex < W / 2 ? 125 : -125;
-          else ey += ey < H / 2 ? 28 : -28;
-          k = -1;
-        }
+      // nudge along the edge so labels don't stack; the direction is fixed up front and the
+      // number of nudges bounded, so two neighbours can never bounce a label back and forth
+      const horizontal = Math.abs(ey - mT) < 2 || Math.abs(ey - (H - mB)) < 2;
+      const step = horizontal ? (ex < W / 2 ? 125 : -125) : (ey < H / 2 ? 28 : -28);
+      for (let tries = 0; tries < 6 && placed.some(([px, py]) => Math.abs(px - ex) < 120 && Math.abs(py - ey) < 26); tries++) {
+        if (horizontal) ex += step; else ey += step;
       }
       placed.push([ex, ey]);
       const ang = Math.atan2(dy, dx);

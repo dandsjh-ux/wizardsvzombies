@@ -1372,9 +1372,7 @@ export class Game {
         zb.x += (mx / ml) * step;
         zb.z += (mz / ml) * step;
         const want = Math.atan2(mx, mz);
-        let da = want - zb.f;
-        while (da > Math.PI) da -= Math.PI * 2;
-        while (da < -Math.PI) da += Math.PI * 2;
+        const da = ((((want - zb.f + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
         zb.f += da * Math.min(1, DT * 8);
       }
       // separation
