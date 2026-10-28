@@ -501,7 +501,7 @@ function mesh(geo, mat, x = 0, y = 0, z = 0) {
 export function makeConstructMesh(kind, softTex) {
   const g = new THREE.Group();
   const glow = (color, r) => {
-    const d = new THREE.Mesh(new THREE.CircleGeometry(r, 32), new THREE.MeshBasicMaterial({ map: softTex, color, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const d = new THREE.Mesh(new THREE.CircleGeometry(r, 32), new THREE.MeshBasicMaterial({ map: softTex, color, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false }));
     d.rotation.x = -Math.PI / 2;
     d.position.y = 0.04;
     return d;

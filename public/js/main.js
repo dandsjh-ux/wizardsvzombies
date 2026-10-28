@@ -475,7 +475,7 @@ class Game {
       case 'summon': fx.ring(e[1], e[2], 3, 0x9a4dff, 0.8); fx.emit(e[1], 0.4, e[2], 40, { color: 0x6a3aff, color2: 0x20ff80, speed: 3, life: 0.8, size: 0.5 }); break;
       case 'bomb': {
         const p = this.posOf(e[1]);
-        if (p) fx.projectile(-1e9 - Math.random() * 1e6, 'acid', p.x, p.z, -1, e[2], e[3], 18, 0, () => null);
+        if (p) fx.projectile(-1e9 - Math.random() * 1e6, 'bomb', p.x, p.z, -1, e[2], e[3], 18, 0, () => null, true);
         break;
       }
       case 'wave': sfx(e[1] % 10 === 0 ? 'bosshorn' : 'horn', 1); break;

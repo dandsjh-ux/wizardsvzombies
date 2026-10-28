@@ -100,7 +100,7 @@ export const QUIZ_BANK = [
   // ----- Choosing powerful verbs -----
   { type: 'verb', q: 'Which verb best shows the witch was ANGRY? "The witch ___, \'Get out!\'"', choices: ['whispered', 'snarled', 'giggled', 'mumbled'], a: 1,
     explain: '"Snarled" is a powerful verb that shows anger.' },
-  { type: 'verb', q: 'Which suffix turns the noun "terror" into a VERB? "The monster tried to ___ the villagers."', choices: ['terrorful', 'terrify', 'terrorly', 'terrorness'], a: 1,
+  { type: 'verb', q: 'Add a suffix to turn the noun "terror" into a VERB: "The monster tried to ___ the villagers."', choices: ['terrorful', 'terrify', 'terrorly', 'terrorness'], a: 1,
     explain: 'The suffix -ify can turn nouns into verbs: terror → terrify.' },
   { type: 'verb', q: 'Turn the noun "crystal" into a verb: "The cold made the water ___."', choices: ['crystallise', 'crystalful', 'crystalness', 'crystally'], a: 0,
     explain: 'The suffix -ise turns nouns into verbs: crystal → crystallise.' },

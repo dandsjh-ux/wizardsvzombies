@@ -6,7 +6,7 @@ const MAX_P = 4000;
 
 const SPELL_COLORS = {
   wand: 0xffe0a0, turret: 0xff7a20, firebolt: 0xff6a20, frost_shard: 0x8fdcff, holy_smite: 0xfff2a0, arcane_spark: 0xc07cff,
-  arcane_barrage: 0xff60d0, acid: 0x9cff40, plague: 0xa8e040, shadow: 0x6a40ff,
+  arcane_barrage: 0xff60d0, acid: 0x9cff40, plague: 0xa8e040, shadow: 0x6a40ff, bomb: 0xff8a20,
 };
 
 export class FX {
@@ -162,14 +162,15 @@ export class FX {
 
   // ------------------------------------------------------------------ projectiles
   // getTarget(tid) -> {x,y,z} | null. tid >= 0 zombie, <= -2 player (-2 - pid), -1 none (fly to tx,tz).
-  projectile(id, kind, ox, oz, tid, tx, tz, speed, curve, getTarget) {
+  // visualOnly projectiles (thrown bombs) get no hit event from the server and vanish on arrival.
+  projectile(id, kind, ox, oz, tid, tx, tz, speed, curve, getTarget, visualOnly = false) {
     const color = SPELL_COLORS[kind] ?? 0xffffff;
     const big = kind === 'firebolt' || kind === 'turret' || kind === 'holy_smite' || kind === 'shadow' || kind === 'plague';
     const sz = kind === 'wand' ? 0.13 : big ? 0.24 : 0.18;
     const mat = new THREE.MeshBasicMaterial({ color });
     const m = new THREE.Mesh(this.projGeo, mat);
     m.scale.setScalar(sz);
-    const lob = kind === 'acid' || kind === 'plague';
+    const lob = kind === 'acid' || kind === 'plague' || kind === 'bomb';
     m.position.set(ox, 1.2, oz);
     this.scene.add(m);
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.softTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -180,7 +181,7 @@ export class FX {
     const p = {
       m, kind, color, speed, tid, tx, tz, x: ox, z: oz, y: 1.2, t: 0, getTarget, lob,
       vx: Math.sin(dir) * speed, vz: Math.cos(dir) * speed, curve: curve || 0,
-      straight: tid === -1 && !lob, total: Math.hypot(tx - ox, tz - oz), ox, oz,
+      straight: tid === -1 && !lob, total: Math.hypot(tx - ox, tz - oz), ox, oz, visualOnly,
     };
     if (p.straight) { const d = Math.hypot(tx - ox, tz - oz) || 1; p.vx = ((tx - ox) / d) * speed; p.vz = ((tz - oz) / d) * speed; }
     this.projs.set(id, p);
@@ -216,6 +217,7 @@ export class FX {
         if (dl > step) { p.x += (dx / dl) * step; p.z += (dz / dl) * step; }
         const prog = 1 - Math.min(1, Math.hypot(p.tx - p.x, p.tz - p.z) / Math.max(0.1, p.total));
         p.y = 1.2 + Math.sin(prog * Math.PI) * Math.min(4, p.total * 0.35) - prog * 0.9;
+        if (p.visualOnly && dl <= step) { this.scene.remove(p.m); disposeObj(p.m); this.projs.delete(id); continue; }
       } else {
         // steer toward the target (curved for missiles)
         const dx = tx - p.x, dz = tz - p.z, dl = Math.hypot(dx, dz) || 1;
