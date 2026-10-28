@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#16111f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Co-op isometric wizard village defence: up to 3 wizards hold the palisade against 30 waves of zombies.">
+  <title>Wizards vs Zombies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three/build/three.module.js", "three/addons/": "/vendor/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <div id="game"></div>
+  <div id="world-ui"></div>
+  <div id="indicators"></div>
+
+  <div id="hud" class="hidden">
+    <div id="me-frame" class="frame">
+      <div id="me-portrait"><span id="me-icon"></span><span id="me-level">1</span></div>
+      <div class="me-bars">
+        <div class="me-name"><span id="me-name"></span> <small id="me-class"></small></div>
+        <div class="bar hp" id="me-hp"><div class="fill"></div><div class="shield"></div><span></span></div>
+        <div class="bar mana" id="me-mana"><div class="fill"></div><span></span></div>
+        <div class="bar xp" id="me-xp"><div class="fill"></div><span></span></div>
+        <div class="res">
+          <span title="Gold">🪙 <b id="res-gold">0</b></span>
+          <span title="Timber">🪵 <b id="res-wood">0</b></span>
+          <span title="Stone">🪨 <b id="res-stone">0</b></span>
+        </div>
+      </div>
+    </div>
+    <div id="buffs"></div>
+    <div id="party"></div>
+
+    <div id="wave-panel" class="frame">
+      <div id="wave-title">Wave 1 / 30</div>
+      <div id="wave-sub"></div>
+      <div class="bar heart" id="heart-bar"><div class="fill"></div><span>Well of Renewal</span></div>
+      <div class="bar boss hidden" id="boss-bar"><div class="fill"></div><span></span></div>
+      <button id="btn-ready" class="hidden">Ready ✔</button>
+    </div>
+
+    <div id="map-wrap" class="frame">
+      <canvas id="minimap" width="200" height="200"></canvas>
+      <div id="map-buttons">
+        <button data-act="rotl" title="Rotate camera ( [ )">⟲</button>
+        <button data-act="rotr" title="Rotate camera ( ] )">⟳</button>
+        <button data-act="zin" title="Zoom in">＋</button>
+        <button data-act="zout" title="Zoom out">－</button>
+        <button data-act="sound" title="Sound (M)" id="btn-sound">🔊</button>
+        <button data-act="help" title="Help (H)">❔</button>
+      </div>
+    </div>
+
+    <div id="announce"></div>
+    <div id="toast"></div>
+
+    <div id="bottom">
+      <div id="itembar"></div>
+      <div id="skillbar"></div>
+    </div>
+    <div id="actions">
+      <button id="act-interact" class="act hidden"><span class="ic">💬</span><span class="lb">Talk</span><kbd>F</kbd></button>
+      <button id="act-build" class="act"><span class="ic">🛠</span><span class="lb">Build</span><kbd>B</kbd></button>
+      <button id="act-auto" class="act on"><span class="ic">🎯</span><span class="lb">Auto</span><kbd>V</kbd></button>
+    </div>
+
+    <div id="chat">
+      <div id="chat-log"></div>
+      <input id="chat-input" maxlength="120" placeholder="Say something… (Enter)" autocomplete="off">
+      <button id="chat-btn" title="Chat (Enter)">💬</button>
+    </div>
+
+    <div id="place-bar" class="hidden frame">
+      <div id="place-name"></div>
+      <div id="place-hint"></div>
+      <div class="row">
+        <button id="place-rot">⟳ Rotate</button>
+        <button id="place-ok" class="primary">✔ Place</button>
+        <button id="place-cancel">✖ Cancel</button>
+      </div>
+    </div>
+
+    <div id="death" class="hidden"><div class="t">You have fallen</div><div class="s"></div></div>
+    <div id="tooltip" class="hidden"></div>
+  </div>
+
+  <div id="panel" class="hidden">
+    <div class="panel-inner frame">
+      <div class="panel-head"><span class="panel-icon"></span><div><div class="panel-title"></div><div class="panel-sub"></div></div><button class="panel-close" title="Close (Esc)">✖</button></div>
+      <div class="panel-body"></div>
+    </div>
+  </div>
+
+  <div id="screen-loading" class="screen">
+    <div class="title-block">
+      <h1>Wizards <span>vs</span> Zombies</h1>
+      <p>Summoning the village…</p>
+      <div class="progress"><div></div></div>
+    </div>
+  </div>
+
+  <div id="screen-join" class="screen hidden">
+    <div class="join-inner">
+      <h1>Wizards <span>vs</span> Zombies</h1>
+      <p class="tag">Hold the palisade. Protect the Well of Renewal. Survive 30 waves of the dead.</p>
+      <div id="join-status"></div>
+      <label class="name-row">Your wizard name <input id="join-name" maxlength="16" placeholder="e.g. Merlin" autocomplete="off"></label>
+      <div id="class-cards"></div>
+      <button id="join-btn" class="primary big" disabled>Choose a class</button>
+      <div class="join-help">
+        <b>Mouse:</b> click to move / attack · right-click or 1-8 to cast at the cursor · wheel to zoom<br>
+        <b>Touch:</b> tap to move or attack · hold &amp; drag to walk · tap a spell to auto-target · pinch to zoom
+      </div>
+    </div>
+  </div>
+
+  <div id="conn" class="hidden"><div class="spinner"></div><span>Reconnecting to the village…</span></div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
