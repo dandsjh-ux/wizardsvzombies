@@ -455,6 +455,22 @@ export class World {
     return Math.abs(lx) < s.hx + pad && Math.abs(lz) < s.hz + pad;
   }
 
+  // Darken the sky with a red cast while a boss walks the field.
+  setMood(boss, dt) {
+    if (!this.mood) {
+      this.mood = { k: 0, sky: new THREE.Color(0x9cc2de), skyBoss: new THREE.Color(0x5a3a48), hemi: new THREE.Color(0xcfe3ff), hemiBoss: new THREE.Color(0xd08a7a), sun: new THREE.Color(0xffe6c4), sunBoss: new THREE.Color(0xff9a6a) };
+    }
+    const m = this.mood;
+    const target = boss ? 1 : 0;
+    if (Math.abs(m.k - target) < 0.001) return;
+    m.k += (target - m.k) * Math.min(1, dt * 0.8);
+    this.scene.background.copy(m.sky).lerp(m.skyBoss, m.k);
+    this.scene.fog.color.copy(this.scene.background);
+    this.hemi.color.copy(m.hemi).lerp(m.hemiBoss, m.k);
+    this.sun.color.copy(m.sun).lerp(m.sunBoss, m.k);
+    this.hemi.intensity = 1.15 - 0.3 * m.k;
+  }
+
   update(dt, now) {
     for (const a of this.animated) a.obj.rotation.z += a.spin * dt;
     this.updateFenceVisuals(now);

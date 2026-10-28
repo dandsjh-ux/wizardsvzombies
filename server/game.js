@@ -201,7 +201,7 @@ export class Game {
   handleJoin(client, msg) {
     if (client.playerId && this.players.has(client.playerId)) return;
     if (!client.token) return;
-    const cls = typeof msg.cls === 'string' && CLASSES[msg.cls] ? msg.cls : null;
+    const cls = typeof msg.cls === 'string' && Object.hasOwn(CLASSES, msg.cls) ? msg.cls : null;
     if (!cls) return;
     if (this.phase === 'over') return client.send({ t: 'error', text: 'The battle is ending — a new game starts shortly.' });
     if (this.slotsUsed() >= MAX_PLAYERS) return client.send({ t: 'full' });
@@ -650,9 +650,9 @@ export class Game {
   handleCast(p, msg) {
     if (p.dead || this.phase === 'over') return;
     const id = msg.s;
+    if (typeof id !== 'string' || !Object.hasOwn(SPELLS, id) || !Object.hasOwn(p.spells, id)) return;
     const sp = SPELLS[id];
     const rank = p.spells[id];
-    if (!sp || !rank) return;
     if ((p.cds[id] || 0) > this.time + 0.05) return;
     const mana = rankVal(sp.mana, rank);
     if (p.mana < mana) return this.toast(p, 'Not enough mana!');
@@ -962,7 +962,7 @@ export class Game {
   handleUse(p, msg) {
     if (p.dead || this.phase === 'over') return;
     const it = msg.item;
-    if (!ITEMS[it] || ITEMS[it].material || ITEMS[it].passive) return;
+    if (typeof it !== 'string' || !Object.hasOwn(ITEMS, it) || ITEMS[it].material || ITEMS[it].passive) return;
     if (!(p.inv[it] > 0)) return this.toast(p, `You have no ${ITEMS[it].name}. Buy some from the Trader.`);
     if (this.time < (p.itemReady || 0)) return;
     let used = false;
@@ -1017,8 +1017,8 @@ export class Game {
   }
 
   handleBuy(p, msg) {
+    if (typeof msg.item !== 'string' || !Object.hasOwn(ITEMS, msg.item)) return;
     const it = ITEMS[msg.item];
-    if (!it) return;
     if (!this.nearNpc(p, 'trader')) return this.toast(p, 'Visit Gareth the Trader to buy items');
     const qty = clamp(Math.floor(Number(msg.qty) || 1), 1, 10);
     const have = msg.item === 'wood' ? p.wood : msg.item === 'stone' ? p.stone : p.inv[msg.item] || 0;
@@ -1033,8 +1033,9 @@ export class Game {
   }
 
   handleBuySpell(p, msg) {
+    if (typeof msg.id !== 'string' || !Object.hasOwn(SPELLS, msg.id)) return;
     const sp = SPELLS[msg.id];
-    if (!sp || sp.cls !== p.cls) return;
+    if (sp.cls !== p.cls) return;
     if (!this.nearNpc(p, 'arcanist')) return this.toast(p, 'Visit Mystra the Arcanist to buy spellbooks');
     const rank = p.spells[msg.id] || 0;
     if (rank >= 3) return;
@@ -1083,8 +1084,9 @@ export class Game {
 
   handleBuild(p, msg) {
     if (p.dead || this.phase === 'over') return;
+    if (typeof msg.kind !== 'string' || !Object.hasOwn(CONSTRUCTS, msg.kind)) return;
     const d = CONSTRUCTS[msg.kind];
-    if (!d || d.cls !== p.cls) return;
+    if (d.cls !== p.cls) return;
     const x = Number(msg.x), z = Number(msg.z), rot = Number(msg.rot) || 0;
     if (!Number.isFinite(x) || !Number.isFinite(z)) return;
     if (d2(x, z, p.x, p.z) > (BUILD_RANGE + 1) ** 2) return this.toast(p, 'Too far away to build there');

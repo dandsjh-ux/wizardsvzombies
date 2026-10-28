@@ -179,6 +179,8 @@ button.primary:disabled { filter: grayscale(1) brightness(0.6); cursor: default;
 .zbar { position: absolute; left: 0; top: 0; width: 2.6rem; height: 0.3rem; background: rgba(0, 0, 0, 0.7); border-radius: 0.15rem; overflow: hidden; will-change: transform; }
 .zbar div { height: 100%; background: #e04030; }
 .zbar.elite { width: 3.6rem; height: 0.4rem; outline: 1px solid #ffb030; }
+.zbar.con div { background: #e9c46a; }
+.zbar.con.hot { outline: 1px solid #ff4030; }
 .dmg { position: absolute; left: 0; top: 0; font-weight: 800; font-size: 0.95rem; text-shadow: 0 1px 2px #000, 0 0 3px #000; will-change: transform, opacity; white-space: nowrap; }
 .dmg.k0 { color: #fff3c8; }
 .dmg.k1 { color: #ff5a4a; font-size: 1.05rem; }

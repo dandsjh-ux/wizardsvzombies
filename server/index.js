@@ -15,7 +15,8 @@ const PORT = Number(process.env.PORT) || 3000;
 
 const app = express();
 app.disable('x-powered-by');
-app.use(compression());
+// gzip the kit GLB too (vertex data shrinks a lot); it isn't in compression's default type list
+app.use(compression({ filter: (req, res) => req.path.endsWith('.glb') || compression.filter(req, res) }));
 app.get('/healthz', (_req, res) => res.type('text').send('ok'));
 app.use('/vendor/three/build', express.static(path.join(root, 'node_modules/three/build'), { maxAge: '7d' }));
 app.use('/vendor/three/examples/jsm', express.static(path.join(root, 'node_modules/three/examples/jsm'), { maxAge: '7d' }));

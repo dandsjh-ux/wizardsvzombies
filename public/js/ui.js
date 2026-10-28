@@ -787,6 +787,18 @@ export class UI {
       b.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, 0)`;
       b.firstChild.style.width = z.hpPct + '%';
     }
+    // constructs show a health bar once damaged
+    for (const c of g.world.constructs.values()) {
+      if (c.hp >= c.maxHp) continue;
+      const key = 'c' + c.id;
+      seen.add(key);
+      let b = this.zbars.get(key);
+      if (!b) { b = el('div', 'zbar con', '<div></div>'); this.worldUi.appendChild(b); this.zbars.set(key, b); }
+      const [sx, sy] = this.project(c.x, 2.6, c.z);
+      b.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, 0)`;
+      b.firstChild.style.width = Math.max(0, (c.hp / c.maxHp) * 100) + '%';
+      b.classList.toggle('hot', c.hotUntil > now);
+    }
     for (const [id, b] of this.zbars) if (!seen.has(id)) { b.remove(); this.zbars.delete(id); }
 
     // floating numbers

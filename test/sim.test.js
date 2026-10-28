@@ -113,3 +113,20 @@ test('casting, shopping, building and the quiz work through the message API', ()
   const r = a.last('quizR');
   assert.ok(r && typeof r.correct === 'boolean');
 });
+
+test('malformed or hostile messages are ignored without throwing', () => {
+  const g = new Game();
+  const a = connect(g, 'tokenHOSTILE11');
+  g.onMessage(a, { t: 'join', name: '<b>x</b>', cls: '__proto__' });
+  assert.equal(g.players.size, 0);
+  g.onMessage(a, { t: 'join', name: '<script>', cls: 'striker' });
+  const p = [...g.players.values()][0];
+  assert.ok(!/[<>]/.test(p.name));
+  for (const m of [
+    { t: 'cast', s: '__proto__', x: 1, z: 1 }, { t: 'cast', s: 'constructor' }, { t: 'cast', s: 'firebolt', x: NaN, z: 'a' },
+    { t: 'buy', item: '__proto__' }, { t: 'buy', item: 'toString', qty: 1e9 }, { t: 'use', item: 'hasOwnProperty' },
+    { t: 'spell', id: '__proto__' }, { t: 'build', kind: 'constructor', x: 0, z: 0 }, { t: 'mv', x: 1e9, z: -1e9, q: p.tpSeq },
+    { t: 'quizAnswer', id: 'x', choice: 99 }, { t: 'chat', text: { a: 1 } }, { t: 42 }, null,
+  ]) assert.doesNotThrow(() => g.onMessage(a, m));
+  assert.ok(Math.abs(p.x) <= 58 && Math.abs(p.z) <= 58);
+});

@@ -983,6 +983,7 @@ class Game {
     }
     this.updateEntities(dt, now);
     this.world.update(dt, now);
+    this.world.setMood(!!this.boss, dt);
     if (joined) {
       this.world.updateCamera(new THREE.Vector3(this.localPos.x, 0, this.localPos.z), dt);
       this.world.updateOcclusion(this.localPos.x, this.localPos.z, dt);
